@@ -2,29 +2,19 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Buscar artigos por autor (arXiv)</title>
+  <title>Artigos do arXiv de 2024</title>
 </head>
 <body>
-  <h1>Buscar artigos no arXiv</h1>
-  <label for="autor">Nome do autor:</label>
-  <input type="text" id="autor" placeholder="Ex: John Doe">
-  <button onclick="buscarArtigos()">Buscar</button>
-
+  <h1>Artigos do arXiv publicados em 2024</h1>
   <ul id="resultado"></ul>
 
   <script>
-    async function buscarArtigos() {
-      const autor = document.getElementById('autor').value.trim();
-      if (!autor) {
-        alert('Por favor, digite o nome de um autor.');
-        return;
-      }
-
+    async function listarArtigos2024() {
       const resultadoEl = document.getElementById('resultado');
       resultadoEl.innerHTML = 'Carregando...';
 
-      const autorFormatado = autor.replace(/\s+/g, '+');
-      const url = `https://export.arxiv.org/api/query?search_query=au:${autorFormatado}&start=0&max_results=20`;
+      // Consulta genérica (todos os artigos) com limite de 100 resultados
+      const url = 'https://export.arxiv.org/api/query?search_query=all&start=0&max_results=100';
 
       try {
         const resposta = await fetch(url);
@@ -34,10 +24,7 @@
         const entradas = xml.getElementsByTagName('entry');
 
         resultadoEl.innerHTML = '';
-        if (entradas.length === 0) {
-          resultadoEl.innerHTML = '<li>Nenhum artigo encontrado.</li>';
-          return;
-        }
+        let encontrados = 0;
 
         for (let i = 0; i < entradas.length; i++) {
           const entrada = entradas[i];
@@ -45,24 +32,27 @@
           const link = entrada.getElementsByTagName('id')[0].textContent;
           const publicado = entrada.getElementsByTagName('published')[0].textContent;
 
-          // Filtra para incluir apenas artigos de 2024
-          if (publicado.slice(0, 4) !== "2024") {
-            continue;  // Ignora artigos não publicados em 2024
-          }
+          // Filtra apenas artigos de 2024
+          if (publicado.slice(0, 4) !== "2024") continue;
 
           const li = document.createElement('li');
           li.innerHTML = `<a href="${link}" target="_blank">${titulo}</a> <br><small>Publicado em: ${publicado}</small>`;
           resultadoEl.appendChild(li);
+          encontrados++;
+
+          if (encontrados >= 20) break; // Mostra apenas os primeiros 20 artigos de 2024
         }
 
-        if (resultadoEl.innerHTML === '') {
+        if (encontrados === 0) {
           resultadoEl.innerHTML = '<li>Nenhum artigo de 2024 encontrado.</li>';
         }
       } catch (erro) {
         resultadoEl.innerHTML = `<li>Erro ao buscar artigos: ${erro.message}</li>`;
       }
     }
+
+    // Executa ao carregar a página
+    listarArtigos2024();
   </script>
 </body>
 </html>
-
