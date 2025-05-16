@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar artigos por autor (arXiv)</title>
+</head>
+<body>
+  <h1>Buscar artigos no arXiv</h1>
+  <label for="autor">Nome do autor:</label>
+  <input type="text" id="autor" placeholder="Ex: John Doe">
+  <button onclick="buscarArtigos()">Buscar</button>
+
+  <ul id="resultado"></ul>
+
+  <script>
+    async function buscarArtigos() {
+      const autor = document.getElementById('autor').value.trim();
+      if (!autor) {
+        alert('Por favor, digite o nome de um autor.');
+        return;
+      }
+
+      const resultadoEl = document.getElementById('resultado');
+      resultadoEl.innerHTML = 'Carregando...';
+
+      const autorFormatado = autor.replace(/\s+/g, '+');
+      const url = `https://export.arxiv.org/api/query?search_query=au:${autorFormatado}&start=0&max_results=20`;
+
+      try {
+        const resposta = await fetch(url);
+        const texto = await resposta.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(texto, "text/xml");
+        const entradas = xml.getElementsByTagName('entry');
+
+        resultadoEl.innerHTML = '';
+        if (entradas.length === 0) {
+          resultadoEl.innerHTML = '<li>Nenhum artigo encontrado.</li>';
+          return;
+        }
+
+        for (let i = 0; i < entradas.length; i++) {
+          const entrada = entradas[i];
+          const titulo = entrada.getElementsByTagName('title')[0].textContent;
+          const link = entrada.getElementsByTagName('id')[0].textContent;
+          const publicado = entrada.getElementsByTagName('published')[0].textContent;
+
+          // Filtra para incluir apenas artigos de 2024
+          if (publicado.slice(0, 4) !== "2024") {
+            continue;  // Ignora artigos não publicados em 2024
+          }
+
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${link}" target="_blank">${titulo}</a> <br><small>Publicado em: ${publicado}</small>`;
+          resultadoEl.appendChild(li);
+        }
+
+        if (resultadoEl.innerHTML === '') {
+          resultadoEl.innerHTML = '<li>Nenhum artigo de 2024 encontrado.</li>';
+        }
+      } catch (erro) {
+        resultadoEl.innerHTML = `<li>Erro ao buscar artigos: ${erro.message}</li>`;
+      }
+    }
+  </script>
+</body>
+</html>
+
