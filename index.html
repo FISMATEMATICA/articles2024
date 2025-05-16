@@ -31,7 +31,7 @@
   </style>
 </head>
 <body>
-  <h1>Publicações 2025</h1>
+  <h1>Publicações 2024</h1>
   <div id="results">Carregando...</div>
 
   <script>
@@ -82,7 +82,7 @@
           const link = entry.querySelector("id")?.textContent || "#";
           const publishedDate = entry.querySelector("published")?.textContent || "";
           const year = publishedDate.slice(0, 4);
-          if (year !== "2025") return;
+          if (year !== "2024") return;
 
           const authors = Array.from(entry.querySelectorAll("author > name")).map(a => a.textContent.trim());
 
@@ -110,7 +110,7 @@
           `;
         });
 
-        resultsDiv.innerHTML = html || "Nenhuma publicação de 2025 encontrada.";
+        resultsDiv.innerHTML = html || "Nenhuma publicação de 2024 encontrada.";
       } catch (error) {
         resultsDiv.innerHTML = "Erro ao carregar os dados: " + error.message;
       }
